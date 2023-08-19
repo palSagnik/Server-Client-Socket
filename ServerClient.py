@@ -1,12 +1,14 @@
 import socket
 import threading
 
+# Defining variables which are going to be repeatedly used
 HOST = socket.gethostbyname(socket.gethostname())
 PORT = 9090
 SERVER_ADDR = (HOST, PORT)
 DISCONNECT_MSG = "DEAD"
 FORMAT = 'utf-8'
 
+# Making a choice to discard the usage of two separate code for server and client
 print("Do you want a server or client?")
 print("Enter S or C.")
 
@@ -14,6 +16,8 @@ answer = input('--> ').upper()
 
 # Server socket
 if answer == "S":
+    
+    # Initialising and defining a server socket
     server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
     server_socket.bind(SERVER_ADDR)
 
@@ -26,17 +30,19 @@ if answer == "S":
             data_from_client = connection.recv(4096).decode(FORMAT)
             print(f'From {address}: ' + str(data_from_client))
 
+            # If the received message is not disconnect message then continue to send data
             if data_from_client != DISCONNECT_MSG:
                 data_to_client = input('--> ')
                 connection.send(data_to_client.encode(FORMAT))
 
+            # change connected_1 flag to false and exit the loop
             else:
                 connected_1 = False
 
         connection.close()
         print(f'{address} has DISCONNECTED')
 
-    # starting
+    # starting the server socket
     def start():
         print("-------------------------------------------")
         print("[ESTABLISHING]")
@@ -45,7 +51,6 @@ if answer == "S":
 
         while True:
             connection, address = server_socket.accept()
-            # json data from client which has (user, private_key)
             thread = threading.Thread(target=handle_a_client, args=(connection, address))
             thread.start()
             print(f'CONNECTIONS: {threading.active_count() - 1}')
@@ -57,11 +62,13 @@ if answer == "S":
 
 # Client Socket
 if answer == "C":
+    # Initialising and defining the type of client socket
     client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
     client_socket.connect(SERVER_ADDR)
 
     print("Waiting for connection....")
 
+    # function which sends and receive data to and from server
     def send_to_server_and_recv(data_to_server):
         data_to_server = message.encode(FORMAT)
         client_socket.send(data_to_server)
